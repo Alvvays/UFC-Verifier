@@ -53,3 +53,34 @@ const renderStatistics = async () => {
 
 // Запуск приложения
 renderStatistics();
+
+const renderForm = () => {
+  app.innerHTML = `
+    <h1 class="text-2xl font-bold mb-4">Add a Prediction</h1>
+    <form id="predictionForm" class="space-y-4">
+      <input type="text" name="event" placeholder="Event" class="block w-full" />
+      <input type="text" name="prediction" placeholder="Prediction" class="block w-full" />
+      <input type="number" name="stake" placeholder="Stake" class="block w-full" />
+      <input type="number" name="odds" placeholder="Odds" class="block w-full" />
+      <input type="text" name="bookmaker" placeholder="Bookmaker" class="block w-full" />
+      <button type="submit" class="bg-blue-500 text-white py-2 px-4">Save</button>
+    </form>
+  `;
+
+  document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.target);
+    const prediction = Object.fromEntries(formData);
+
+    prediction.date = new Date().toISOString().split('T')[0];
+    prediction.profit = 0;
+    prediction.result = 'pending';
+
+    await window.db.insertPrediction(prediction);
+    renderStatistics();
+  });
+};
+
+renderForm();
+
