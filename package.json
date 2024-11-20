@@ -1,0 +1,14 @@
+{
+  "name": "ufc-predictions",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "react-scripts start"
+  },
+  "dependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "sqlite": "^4.0.25",
+    "sqlite3": "^5.1.6"
+  }
+}
