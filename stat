@@ -1,0 +1,74 @@
+import React, { useEffect, useState } from "react";
+import database from "../utils/database";
+
+const Statistics = () => {
+  const [stats, setStats] = useState({});
+  const [lastPredictions, setLastPredictions] = useState([]);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      const db = await database;
+
+      // Общая статистика
+      const totalBets = await db.get("SELECT COUNT(*) as count FROM predictions");
+      const totalProfit = await db.get("SELECT SUM(profit) as total FROM predictions");
+      const totalStake = await db.get("SELECT SUM(stake) as total FROM predictions");
+
+      // Последние 15 прогнозов
+      const predictions = await db.all(
+        "SELECT * FROM predictions ORDER BY id DESC LIMIT 15"
+      );
+
+      setStats({
+        totalBets: totalBets.count || 0,
+        totalProfit: totalProfit.total || 0,
+        totalStake: totalStake.total || 0,
+        roi: totalStake.total ? (totalProfit.total / totalStake.total) * 100 : 0,
+      });
+
+      setLastPredictions(predictions);
+    };
+
+    fetchStats();
+  }, []);
+
+  return (
+    <div>
+      <h2>Статистика</h2>
+      <div>
+        <p>Всего прогнозов: {stats.totalBets}</p>
+        <p>Чистая прибыль: {stats.totalProfit.toFixed(2)} ед.</p>
+        <p>Оборот: {stats.totalStake.toFixed(2)} ед.</p>
+        <p>ROI: {stats.roi.toFixed(2)}%</p>
+      </div>
+
+      <h3>Последние 15 прогнозов</h3>
+      <table border="1">
+        <thead>
+          <tr>
+            <th>Дата</th>
+            <th>Событие</th>
+            <th>Прогноз</th>
+            <th>Ставка</th>
+            <th>Коэффициент</th>
+            <th>Прибыль</th>
+          </tr>
+        </thead>
+        <tbody>
+          {lastPredictions.map((prediction) => (
+            <tr key={prediction.id}>
+              <td>{prediction.event_date}</td>
+              <td>{prediction.event}</td>
+              <td>{prediction.prediction}</td>
+              <td>{prediction.stake}</td>
+              <td>{prediction.odds}</td>
+              <td>{prediction.profit}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+export default Statistics;
